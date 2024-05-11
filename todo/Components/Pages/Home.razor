@@ -1,7 +1,55 @@
 ﻿@page "/"
+<head>
+    <link rel="stylesheet" href="css/Home.css">
+</head>
 
-<PageTitle>Home</PageTitle>
+<h3><b>To-Do</b></h3>
+<button class="btn-1" @onclick="OpenNewTaskModal"><b>+ New Task</b></button>
+<button class="btn-2" @onclick="ToggleFilters"> <b>Filters</b></button>
 
-<h1>Hello, world!</h1>
+@if (showNewTaskModal)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <span @onclick="CloseNewTaskModal" class="close">&times;</span>
+            <h3>Add New Task</h3>
+            <input type="text" placeholder="Task title" @bind="newTaskTitle" />
+            <input type="date" @bind="newTaskDate" />
+            <input type="time" @bind="newTaskTime" />
+            <button @onclick="AddNewTask">Add Task</button> 
+        </div>
+    </div>
+}
 
-Welcome to your new app.
+@code {
+
+    bool showNewTaskModal = true;
+    string newTaskTitle = "";
+    DateTime newTaskDate = DateTime.Now;
+    DateTime newTaskTime = DateTime.Now;
+    DateTime futureDateTime = DateTime.Now;
+
+    void OpenNewTaskModal()
+    {
+        showNewTaskModal = true;
+    }
+    void CloseNewTaskModal()
+    {
+        showNewTaskModal = false;
+    }
+    void AddNewTask()
+    {
+        CloseNewTaskModal();
+    }
+    void AddTask()
+    {
+        // Logic to add a new task
+    }
+
+    void ToggleFilters()
+    {
+        // Logic to toggle filters
+    }
+    
+   
+}
