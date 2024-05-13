@@ -1,11 +1,18 @@
-﻿@page "/"
+﻿
+@page "/"
 <head>
     <link rel="stylesheet" href="css/Home.css">
 </head>
-
+<title>To Do</title>
 <h3><b>To-Do</b></h3>
-<button class="btn-1" @onclick="OpenNewTaskModal"><b>+ New Task</b></button>
-<button class="btn-2" @onclick="ToggleFilters"> <b>Filters</b></button>
+<button class="btn-1" @onclick="ShowAddTaskInput"><b>Add Task</b></button>
+<ul>
+    @foreach (var task in tasks)
+    {
+        <li>@task.Name</li>
+    }
+</ul>
+<button class="btn-2" @onclick="@(e => ToggleFilter(TaskFilter.Today))" > <b>Filters</b></button>
 
 @if (showNewTaskModal)
 {
@@ -13,43 +20,66 @@
         <div class="modal-content">
             <span @onclick="CloseNewTaskModal" class="close">&times;</span>
             <h3>Add New Task</h3>
-            <input type="text" placeholder="Task title" @bind="newTaskTitle" />
+            <input type="text" placeholder="Task title" @bind="newTask" />
             <input type="date" @bind="newTaskDate" />
             <input type="time" @bind="newTaskTime" />
-            <button @onclick="AddNewTask">Add Task</button> 
+            <button @onclick="AddTask">Add Task</button>
         </div>
     </div>
 }
+@if (showAddTaskInput)
+{
+    <input @bind="newTaskName" placeholder="Enter new task name" />
+    <button @onclick="AddQuickTask">Add</button>
+}
 
 @code {
-
-    bool showNewTaskModal = true;
-    string newTaskTitle = "";
+    bool showNewTaskModal = false;
+    bool showAddTaskInput = false;
+    string newTaskName = "";
+    string newTask = "";
     DateTime newTaskDate = DateTime.Now;
     DateTime newTaskTime = DateTime.Now;
     DateTime futureDateTime = DateTime.Now;
 
-    void OpenNewTaskModal()
+    void OpenNewTaskModal() { showNewTaskModal = true; }
+    void CloseNewTaskModal() { showNewTaskModal = false; }
+//adding task
+    List<TaskItem> tasks = new List<TaskItem>();
+
+    public class TaskItem
     {
-        showNewTaskModal = true;
-    }
-    void CloseNewTaskModal()
-    {
-        showNewTaskModal = false;
-    }
-    void AddNewTask()
-    {
-        CloseNewTaskModal();
-    }
-    void AddTask()
-    {
-        
+        public string Name { get; set; }
+        public DateTime DueDateTime { get; set; }
     }
 
-    void ToggleFilters()
+    void ShowAddTaskInput() { showAddTaskInput = true; }
+
+    public void AddTask()
     {
-        
+        tasks.Add(new TaskItem { Name = newTask, DueDateTime = newTaskDate.Date + newTaskTime.TimeOfDay });
+        newTask = ""; // Clear input field after adding task
+        CloseNewTaskModal();
+        showAddTaskInput = false; // Hide the input field again
     }
-    
-   
+
+    public void AddQuickTask()
+    {
+        tasks.Add(new TaskItem { Name = newTaskName, DueDateTime = DateTime.Now });
+        newTaskName = ""; // Clear input field after adding task
+        showAddTaskInput = false; // Hide the input field again
+    }
+//deleting tasks
+    public void DeleteTask(TaskItem task) { tasks.Remove(task); }
+//filter tasks
+    enum TaskFilter { All, Today, Tomorrow }
+    TaskFilter currentFilter = TaskFilter.All;
+    List<TaskItem> FilteredTasks => currentFilter switch
+    {
+        TaskFilter.Today => tasks.Where(task => task.DueDateTime.Date == DateTime.Today).ToList(),
+        TaskFilter.Tomorrow => tasks.Where(task => task.DueDateTime.Date == DateTime.Today.AddDays(1)).ToList(),
+        _ => tasks.ToList() // All tasks
+    };
+
+    void ToggleFilter(TaskFilter filter) { currentFilter = filter; }
 }
